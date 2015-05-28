@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleMapsApi", "GoogleMaps
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleMapsApiTester", "GoogleMapsApiTester\GoogleMapsApiTester.csproj", "{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleMapsApiWpfClient", "GoogleMapsApiWpfClient\GoogleMapsApiWpfClient.csproj", "{21FC8833-5783-4F19-B610-7E5436D1C66B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,16 @@ Global
 		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Release|Mixed Platforms.Build.0 = Release|x86
 		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Release|x86.ActiveCfg = Release|x86
 		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Release|x86.Build.0 = Release|x86
+		{21FC8833-5783-4F19-B610-7E5436D1C66B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21FC8833-5783-4F19-B610-7E5436D1C66B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21FC8833-5783-4F19-B610-7E5436D1C66B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{21FC8833-5783-4F19-B610-7E5436D1C66B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{21FC8833-5783-4F19-B610-7E5436D1C66B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{21FC8833-5783-4F19-B610-7E5436D1C66B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21FC8833-5783-4F19-B610-7E5436D1C66B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21FC8833-5783-4F19-B610-7E5436D1C66B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{21FC8833-5783-4F19-B610-7E5436D1C66B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{21FC8833-5783-4F19-B610-7E5436D1C66B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

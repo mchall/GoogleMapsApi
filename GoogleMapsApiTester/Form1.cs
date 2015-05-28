@@ -138,7 +138,7 @@ namespace GoogleMapsApiTester
         private void btnStreetView_Click(object sender, EventArgs e)
         {
             _gMapsWrapper.StreetView.Position = new GeographicLocation(-33.9713736, 18.4648659);
-            _gMapsWrapper.StreetView.ShowInfoWindow("Hello world", new GeographicLocation(-33.9711373, 18.4653628), new InfoWindowOptions() { MaxWidth = 100 }, true);
+            _gMapsWrapper.StreetView.ShowInfoWindow("Hello world", new GeographicLocation(-33.9712969, 18.4649886), new InfoWindowOptions() { MaxWidth = 100 }, true);
             _gMapsWrapper.StreetView.Visible = true;
         }
 
