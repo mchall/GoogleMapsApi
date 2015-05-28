@@ -15,6 +15,7 @@ namespace GoogleMapsApiTester
             pgPolygon.SelectedObject = new PolygonOptions();
             pgMarker.SelectedObject = new MarkerOptions();
             pgMapOptions.SelectedObject = new MapOptions();
+            pgStreetViewOptions.SelectedObject = new StreetViewOptions();
 
             InitializeMap();
         }
@@ -134,6 +135,14 @@ namespace GoogleMapsApiTester
             InitializeMap();
         }
 
+        private void btnStreetView_Click(object sender, EventArgs e)
+        {
+            _gMapsWrapper.StreetView.Position = new GeographicLocation(-33.9711373, 18.4653628);
+            _gMapsWrapper.StreetView.POV = new POV() { Heading = 180 };
+            _gMapsWrapper.StreetView.ShowInfoWindow("Hello world", new GeographicLocation(-33.9711373, 18.4653628), new InfoWindowOptions() { MaxWidth = 100 }, true);
+            _gMapsWrapper.StreetView.Visible = true;
+        }
+
         private void InitializeMap()
         {
             if (_gMapsWrapper != null)
@@ -146,7 +155,7 @@ namespace GoogleMapsApiTester
                 _gMapsWrapper.BoundsChanged -= _gMapsWrapper_BoundsChanged;
             }
 
-            _gMapsWrapper = GoogleMapWrapper.Create(this, (MapOptions)pgMapOptions.SelectedObject, new StreetViewOptions()); //TODO
+            _gMapsWrapper = GoogleMapWrapper.Create(this, (MapOptions)pgMapOptions.SelectedObject, (StreetViewOptions)pgStreetViewOptions.SelectedObject);
             _gMapsWrapper.MapClick += _gMapsWrapper_MapClick;
             _gMapsWrapper.ZoomChanged += _gMapsWrapper_ZoomChanged;
             _gMapsWrapper.CenterChanged += _gMapsWrapper_CenterChanged;
@@ -176,7 +185,7 @@ namespace GoogleMapsApiTester
                            "</div>" +
                            "</div>";
 
-                var infoWindow = _gMapsWrapper.ShowInfoWindow(contentString, obj, new InfoWindowOptions(), true);
+                var infoWindow = _gMapsWrapper.ShowInfoWindow(contentString, obj, new InfoWindowOptions() { MaxWidth = 200 }, true);
                 infoWindow.CloseClick += new Action<IInfoWindow>(infoWindow_CloseClick);
             }
             lblLastEvent.Text = "Map_Click";

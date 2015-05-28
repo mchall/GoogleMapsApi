@@ -54,10 +54,14 @@
             this.browser = new System.Windows.Forms.WebBrowser();
             this.pgMapOptions = new System.Windows.Forms.PropertyGrid();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.btnMapTest = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.btnStreetView = new System.Windows.Forms.Button();
+            this.pgStreetViewOptions = new System.Windows.Forms.PropertyGrid();
+            this.btnMapTest = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.cbLimitMap = new System.Windows.Forms.CheckBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -66,6 +70,7 @@
             this.panel2.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.panel3.SuspendLayout();
+            this.groupBox7.SuspendLayout();
             this.groupBox6.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -183,6 +188,7 @@
             // 
             // pgPolygon
             // 
+            this.pgPolygon.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pgPolygon.Dock = System.Windows.Forms.DockStyle.Top;
             this.pgPolygon.HelpVisible = false;
             this.pgPolygon.Location = new System.Drawing.Point(3, 16);
@@ -274,6 +280,7 @@
             // 
             // pgMarker
             // 
+            this.pgMarker.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pgMarker.Dock = System.Windows.Forms.DockStyle.Top;
             this.pgMarker.HelpVisible = false;
             this.pgMarker.Location = new System.Drawing.Point(3, 16);
@@ -328,6 +335,7 @@
             // 
             // pgMapOptions
             // 
+            this.pgMapOptions.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pgMapOptions.Dock = System.Windows.Forms.DockStyle.Top;
             this.pgMapOptions.HelpVisible = false;
             this.pgMapOptions.Location = new System.Drawing.Point(3, 16);
@@ -339,29 +347,21 @@
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.btnMapTest);
+            this.groupBox5.Controls.Add(this.pgStreetViewOptions);
+            this.groupBox5.Controls.Add(this.label4);
             this.groupBox5.Controls.Add(this.pgMapOptions);
             this.groupBox5.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox5.Location = new System.Drawing.Point(0, 0);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(279, 264);
+            this.groupBox5.Size = new System.Drawing.Size(279, 461);
             this.groupBox5.TabIndex = 18;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Map Options";
             // 
-            // btnMapTest
-            // 
-            this.btnMapTest.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnMapTest.Location = new System.Drawing.Point(3, 210);
-            this.btnMapTest.Name = "btnMapTest";
-            this.btnMapTest.Size = new System.Drawing.Size(273, 34);
-            this.btnMapTest.TabIndex = 17;
-            this.btnMapTest.Text = "Map test";
-            this.btnMapTest.UseVisualStyleBackColor = true;
-            this.btnMapTest.Click += new System.EventHandler(this.MapTest_Click);
-            // 
             // panel3
             // 
             this.panel3.Controls.Add(this.groupBox6);
+            this.panel3.Controls.Add(this.groupBox7);
             this.panel3.Controls.Add(this.groupBox5);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel3.Location = new System.Drawing.Point(285, 0);
@@ -369,14 +369,57 @@
             this.panel3.Size = new System.Drawing.Size(279, 765);
             this.panel3.TabIndex = 19;
             // 
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.btnStreetView);
+            this.groupBox7.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBox7.Location = new System.Drawing.Point(0, 461);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(279, 58);
+            this.groupBox7.TabIndex = 20;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "Street View";
+            // 
+            // btnStreetView
+            // 
+            this.btnStreetView.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnStreetView.Location = new System.Drawing.Point(3, 16);
+            this.btnStreetView.Name = "btnStreetView";
+            this.btnStreetView.Size = new System.Drawing.Size(273, 34);
+            this.btnStreetView.TabIndex = 17;
+            this.btnStreetView.Text = "Street View test";
+            this.btnStreetView.UseVisualStyleBackColor = true;
+            this.btnStreetView.Click += new System.EventHandler(this.btnStreetView_Click);
+            // 
+            // pgStreetViewOptions
+            // 
+            this.pgStreetViewOptions.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
+            this.pgStreetViewOptions.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pgStreetViewOptions.HelpVisible = false;
+            this.pgStreetViewOptions.Location = new System.Drawing.Point(3, 223);
+            this.pgStreetViewOptions.Name = "pgStreetViewOptions";
+            this.pgStreetViewOptions.Size = new System.Drawing.Size(273, 194);
+            this.pgStreetViewOptions.TabIndex = 18;
+            this.pgStreetViewOptions.ToolbarVisible = false;
+            // 
+            // btnMapTest
+            // 
+            this.btnMapTest.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnMapTest.Location = new System.Drawing.Point(3, 417);
+            this.btnMapTest.Name = "btnMapTest";
+            this.btnMapTest.Size = new System.Drawing.Size(273, 34);
+            this.btnMapTest.TabIndex = 19;
+            this.btnMapTest.Text = "Map test";
+            this.btnMapTest.UseVisualStyleBackColor = true;
+            // 
             // groupBox6
             // 
             this.groupBox6.Controls.Add(this.cbLimitMap);
             this.groupBox6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox6.Location = new System.Drawing.Point(0, 264);
+            this.groupBox6.Location = new System.Drawing.Point(0, 519);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(279, 58);
-            this.groupBox6.TabIndex = 19;
+            this.groupBox6.TabIndex = 21;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Limit map region";
             // 
@@ -390,6 +433,16 @@
             this.cbLimitMap.TabIndex = 0;
             this.cbLimitMap.Text = "Limit map to South Africa and surroundings?";
             this.cbLimitMap.UseVisualStyleBackColor = true;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Dock = System.Windows.Forms.DockStyle.Top;
+            this.label4.Location = new System.Drawing.Point(3, 210);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(100, 13);
+            this.label4.TabIndex = 23;
+            this.label4.Text = "Street View Options";
             // 
             // Form1
             // 
@@ -412,7 +465,9 @@
             this.groupBox4.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.panel3.ResumeLayout(false);
+            this.groupBox7.ResumeLayout(false);
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
             this.ResumeLayout(false);
@@ -444,13 +499,17 @@
         private System.Windows.Forms.WebBrowser browser;
         private System.Windows.Forms.PropertyGrid pgMapOptions;
         private System.Windows.Forms.GroupBox groupBox5;
-        private System.Windows.Forms.Button btnMapTest;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Label lblLastEvent;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnBoundedGeocoding;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.Button btnStreetView;
+        private System.Windows.Forms.PropertyGrid pgStreetViewOptions;
+        private System.Windows.Forms.Button btnMapTest;
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.CheckBox cbLimitMap;
+        private System.Windows.Forms.Label label4;
     }
 }
 

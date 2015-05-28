@@ -91,7 +91,7 @@ namespace GoogleMapsApi
         {
             string jsonLocation = JsonConvert.SerializeObject(location);
             string jsonInfoWindowOptions = JsonConvert.SerializeObject(infoWindowOptions);
-            int infoWindowId = (int)_host.InvokeScript("showInfoWindow", contentString, jsonLocation, null, jsonInfoWindowOptions, hideOthers, false);
+            int infoWindowId = (int)_host.InvokeScript("showInfoWindow", contentString, jsonLocation, null, jsonInfoWindowOptions, hideOthers, true);
 
             _infoWindows[infoWindowId] = new InfoWindow(_host, infoWindowId);
             return _infoWindows[infoWindowId];
