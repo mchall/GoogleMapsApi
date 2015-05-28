@@ -1,0 +1,815 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <style type="text/css">
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map_canvas {
+            height: 100%;
+        }
+    </style>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry&sensor=false&v=3"></script>
+    <script type="text/javascript">
+
+        var infoWindows = new Array();
+        var polygons = new Array();
+        var markers = new Array();
+        var circles = new Array();
+        var polylines = new Array();
+        var groundOverlays = new Array();
+        var rectangles = new Array();
+
+        var map;
+        var panorama;
+
+        var update_timeout = null;
+
+        google.maps.visualRefresh = true;
+
+        window.onerror = handleErr;
+        window.onresize = function (event) {
+            if (map != null)
+                google.maps.event.trigger(map, 'resize');
+        }
+
+        function handleErr(msg, url, line) {
+            return window.external.HandleException(msg, url, line);
+        }
+
+        function JSONLatLng(latitude, longitude) {
+            this.lat = latitude;
+            this.lng = longitude;
+        }
+
+        function JSONLatLngBounds(latitudeSW, longitudeSW, latitudeNE, longitudeNE) {
+            this.northeast = new JSONLatLng(latitudeNE, longitudeNE);
+            this.southwest = new JSONLatLng(latitudeSW, longitudeSW);
+        }
+
+        function initialize() {
+            map = new google.maps.Map(document.getElementById("map_canvas"));
+            updateMapOptions();
+
+            google.maps.event.addListener(map, 'click', function (event) {
+                update_timeout = setTimeout(function () {
+                    var point = event.latLng;
+                    window.external.FireMapClick(point.lat(), point.lng());
+                }, 200);
+            });
+
+            google.maps.event.addListener(map, 'rightclick', function (event) {
+                var point = event.latLng;
+                window.external.FireMapRightClick(point.lat(), point.lng());
+            });
+
+            google.maps.event.addListener(map, 'dblclick', function (event) {
+                var point = event.latLng;
+                window.external.FireMapDoubleClick(point.lat(), point.lng());
+                clearTimeout(update_timeout);
+            });
+
+            google.maps.event.addListener(map, 'center_changed', function (event) {
+                var point = map.getCenter();
+                window.external.FireMapCenterChanged(point.lat(), point.lng());
+            });
+
+            google.maps.event.addListener(map, 'zoom_changed', function (event) {
+                window.external.FireZoomChanged(map.getZoom());
+            });
+
+            google.maps.event.addListener(map, 'bounds_changed', function (event) {
+                var bounds = map.getBounds();
+                var sw = bounds.getSouthWest();
+                var ne = bounds.getNorthEast();
+                window.external.FireMapBoundsChanged(sw.lat(), sw.lng(), ne.lat(), ne.lng());
+            });
+
+            google.maps.event.addListener(map, 'resize', function (event) {
+                window.external.FireMapResized();
+            });
+
+            google.maps.event.addListener(map, 'dragend', function () {
+                window.external.FireDragEnd();
+            });
+
+            google.maps.event.addListener(map, 'dragstart', function () {
+                window.external.FireDragStart();
+            });
+
+            var jsonPanoramaOptions = window.external.GetJsonPanoramaOptions();
+            var panoramaOptions = $.parseJSON(jsonPanoramaOptions);
+
+            //Special: non-JSON compliant properties
+            if (panoramaOptions.position != null) {
+                panoramaOptions.position = new google.maps.LatLng(panoramaOptions.position.lat, panoramaOptions.position.lng);
+            }
+
+            panorama = new google.maps.StreetViewPanorama(document.getElementById("map_canvas"), panoramaOptions);
+            map.setStreetView(panorama);
+
+            google.maps.event.addListener(panorama, 'position_changed', function (event) {
+                window.external.FireStreetViewPositionChanged();
+            });
+
+            google.maps.event.addListener(panorama, 'pov_changed', function (event) {
+                window.external.FireStreetViewPOVChanged();
+            });
+
+            google.maps.event.addListener(panorama, 'visible_changed', function (event) {
+                window.external.FireStreetViewVisibleChanged();
+            });
+
+            window.external.FireApiReady();
+        }
+
+        function updateMapOptions() {
+            var jsonMapOptions = window.external.GetJsonMapOptions();
+            var mapOptions = $.parseJSON(jsonMapOptions);
+
+            //Special: non-JSON compliant properties
+            mapOptions.center = new google.maps.LatLng(mapOptions.center.lat, mapOptions.center.lng);
+
+            var styles = [
+              {
+                  featureType: "poi.business",
+                  stylers: [
+                  { visibility: "off" }
+                  ]
+              }
+            ];
+            mapOptions.styles = styles;
+
+
+            map.setOptions(mapOptions);
+        }
+
+        //v=3 points to oldest release version of Google Maps API - if no version specified we point to 3.exp (Expirimental)
+        function loadScript() {
+            var mapScript = document.createElement("script");
+            mapScript.type = "text/javascript";
+            var mapUrl = window.external.MapUrl;
+            if (mapUrl.indexOf("v=3") == -1) {
+                mapUrl = mapUrl + "&v=3";
+            }
+            mapScript.src = mapUrl;
+            document.body.appendChild(mapScript);
+        }
+
+        function setZoom(val) {
+            if (map != null)
+                map.setZoom(val);
+        }
+
+        function panToLocation(jsonLocation) {
+            if (map != null) {
+                var location = $.parseJSON(jsonLocation);
+                map.panTo(new google.maps.LatLng(location.lat, location.lng));
+            }
+        }
+
+        function panToBounds(jsonSW, jsonNE) {
+            if (map != null) {
+                var sw = $.parseJSON(jsonSW);
+                var ne = $.parseJSON(jsonNE);
+                map.panToBounds(new google.maps.LatLngBounds(
+		            new google.maps.LatLng(sw.lat, sw.lng),
+		            new google.maps.LatLng(ne.lat, ne.lng)
+		            ));
+            }
+        }
+
+        function panBy(x, y) {
+            if (map != null)
+                map.panBy(x, y);
+        }
+
+        function fitBounds(jsonSW, jsonNE) {
+            if (map != null) {
+                var sw = $.parseJSON(jsonSW);
+                var ne = $.parseJSON(jsonNE);
+                map.fitBounds(new google.maps.LatLngBounds(
+		            new google.maps.LatLng(sw.lat, sw.lng),
+		            new google.maps.LatLng(ne.lat, ne.lng)
+		            ));
+            }
+        }
+
+        function setCenter(lat, lng) {
+            if (map != null)
+                map.setCenter(new google.maps.LatLng(lat, lng))
+        }
+
+        function showInfoWindow(contentString, jsonLocation, markerId, jsonInfoWindowOptions, closeExisting, addToStreetView) {
+            if (closeExisting) {
+                for (i in infoWindows) {
+                    infoWindows[i].close();
+                }
+            }
+
+            var windowOptions = $.parseJSON(jsonInfoWindowOptions);
+            windowOptions.content = contentString;
+
+            if (jsonLocation != null) {
+                var location = $.parseJSON(jsonLocation);
+                windowOptions.position = new google.maps.LatLng(location.lat, location.lng);
+            }
+
+            var infowindow = new google.maps.InfoWindow(windowOptions);
+            infoWindows.push(infowindow);
+
+            infowindow.open(addToStreetView ? panorama : map, markerId != null ? markers[markerId] : null);
+
+            google.maps.event.addListener(infowindow, 'closeclick', function (event) {
+                window.external.FireInfoWindowCloseClick(getItemRow(infoWindows, infowindow));
+            });
+
+            return infoWindows.length - 1;
+        }
+
+        function drawPolygon(jsonCoordinateCollection, jsonPolygonOptions, hideExisting) {
+            if (hideExisting) {
+                for (i in polygons) {
+                    polygons[i].setMap(null);
+                }
+            }
+
+            var coords = new Array();
+            var coordinateCol = $.parseJSON(jsonCoordinateCollection);
+            for (var i = 0; i < coordinateCol.length; i++) {
+                coords.push(new google.maps.LatLng(coordinateCol[i].lat, coordinateCol[i].lng));
+            }
+
+            var polygonOptions = $.parseJSON(jsonPolygonOptions);
+
+            var polygon = new google.maps.Polygon(polygonOptions);
+            polygons.push(polygon);
+
+            polygon.setPaths(coords);
+            polygon.setMap(map);
+
+            google.maps.event.addListener(polygon, 'click', function (event) {
+                update_timeout = setTimeout(function () {
+                    var point = event.latLng;
+                    window.external.FirePolygonClick(getItemRow(polygons, polygon), point.lat(), point.lng());
+                }, 200);
+            });
+
+            google.maps.event.addListener(polygon, 'dblclick', function (event) {
+                var point = event.latLng;
+                window.external.FirePolygonDoubleClick(getItemRow(polygons, polygon), point.lat(), point.lng());
+                clearTimeout(update_timeout);
+            });
+
+            google.maps.event.addListener(polygon, 'rightclick', function (event) {
+                var point = event.latLng;
+                window.external.FirePolygonRightClick(getItemRow(polygons, polygon), point.lat(), point.lng());
+            });
+
+            return polygons.length - 1;
+        }
+
+        function drawPolyline(jsonCoordinateCollection, jsonPolylineOptions, hideExisting) {
+            if (hideExisting) {
+                for (i in polylines) {
+                    polylines[i].setMap(null);
+                }
+            }
+
+            var coords = new Array();
+            var coordinateCol = $.parseJSON(jsonCoordinateCollection);
+            for (var i = 0; i < coordinateCol.length; i++) {
+                coords.push(new google.maps.LatLng(coordinateCol[i].lat, coordinateCol[i].lng));
+            }
+
+            var polylineOptions = $.parseJSON(jsonPolylineOptions);
+
+            var polyline = new google.maps.Polyline(polylineOptions);
+            polylines.push(polyline);
+
+            polyline.setPath(coords);
+            polyline.setMap(map);
+
+            google.maps.event.addListener(polyline, 'click', function (event) {
+                update_timeout = setTimeout(function () {
+                    var point = event.latLng;
+                    window.external.FirePolylineClick(getItemRow(polylines, polyline), point.lat(), point.lng());
+                }, 200);
+            });
+
+            google.maps.event.addListener(polyline, 'dblclick', function (event) {
+                var point = event.latLng;
+                window.external.FirePolylineDoubleClick(getItemRow(polylines, polyline), point.lat(), point.lng());
+                clearTimeout(update_timeout);
+            });
+
+            google.maps.event.addListener(polyline, 'rightclick', function (event) {
+                var point = event.latLng;
+                window.external.FirePolylineRightClick(getItemRow(polylines, polyline), point.lat(), point.lng());
+            });
+
+            return polylines.length - 1;
+        }
+
+        function drawCircle(jsonLocation, radius, jsonCircleOptions, hideExisting) {
+            if (hideExisting) {
+                for (i in circles) {
+                    circles[i].setMap(null);
+                }
+            }
+
+            var location = $.parseJSON(jsonLocation);
+            var circleOptions = $.parseJSON(jsonCircleOptions);
+
+            var circle = new google.maps.Circle(circleOptions);
+            circles.push(circle);
+
+            circle.setCenter(new google.maps.LatLng(location.lat, location.lng));
+            circle.setRadius(radius);
+            circle.setMap(map);
+
+            google.maps.event.addListener(circle, 'click', function (event) {
+                update_timeout = setTimeout(function () {
+                    var point = event.latLng;
+                    window.external.FireCircleClick(getItemRow(circles, circle), point.lat(), point.lng());
+                }, 200);
+            });
+
+            google.maps.event.addListener(circle, 'dblclick', function (event) {
+                var point = event.latLng;
+                window.external.FireCircleDoubleClick(getItemRow(circles, circle), point.lat(), point.lng());
+                clearTimeout(update_timeout);
+            });
+
+            google.maps.event.addListener(circle, 'rightclick', function (event) {
+                var point = event.latLng;
+                window.external.FireCircleRightClick(getItemRow(circles, circle), point.lat(), point.lng());
+            });
+
+            return circles.length - 1;
+        }
+
+        function addMarker(jsonLocation, jsonMarkerOptions, hideExisting, addToStreetView) {
+            if (hideExisting) {
+                for (i in markers) {
+                    markers[i].setVisible(false);
+                }
+            }
+
+            var location = $.parseJSON(jsonLocation);
+            var markerOptions = $.parseJSON(jsonMarkerOptions);
+
+            var marker = new google.maps.Marker(markerOptions);
+            markers.push(marker);
+
+            marker.setPosition(new google.maps.LatLng(location.lat, location.lng));
+            marker.setMap(addToStreetView ? panorama : map);
+
+            google.maps.event.addListener(marker, 'click', function (event) {
+                update_timeout = setTimeout(function () {
+                    var point = event.latLng;
+                    window.external.FireMarkerClick(getItemRow(markers, marker), point.lat(), point.lng());
+                }, 200);
+            });
+
+            google.maps.event.addListener(marker, 'dblclick', function (event) {
+                var point = event.latLng;
+                window.external.FireMarkerDoubleClick(getItemRow(markers, marker), point.lat(), point.lng());
+                clearTimeout(update_timeout);
+            });
+
+            google.maps.event.addListener(marker, 'rightclick', function (event) {
+                var point = event.latLng;
+                window.external.FireMarkerRightClick(getItemRow(markers, marker), point.lat(), point.lng());
+            });
+
+            google.maps.event.addListener(marker, 'dragend', function (event) {
+                var point = event.latLng;
+                window.external.FireMarkerDragEnd(getItemRow(markers, marker), point.lat(), point.lng());
+            });
+
+            return markers.length - 1;
+        }
+
+        function addGroundOverlay(imageUrl, jsonSW, jsonNE, jsonOverlayOptions) {
+            var sw = $.parseJSON(jsonSW);
+            var ne = $.parseJSON(jsonNE);
+            var overlayOptions = $.parseJSON(jsonOverlayOptions);
+
+            var overlay = new google.maps.GroundOverlay(imageUrl,
+                new google.maps.LatLngBounds(
+                        new google.maps.LatLng(sw.lat, sw.lng),
+                        new google.maps.LatLng(ne.lat, ne.lng)),
+                overlayOptions);
+
+            groundOverlays.push(overlay);
+
+            overlay.setMap(map);
+
+            google.maps.event.addListener(overlay, 'click', function (event) {
+                update_timeout = setTimeout(function () {
+                    var point = event.latLng;
+                    window.external.FireGroundOverlayClick(getItemRow(groundOverlays, overlay), point.lat(), point.lng());
+                }, 200);
+            });
+
+            google.maps.event.addListener(overlay, 'dblclick', function (event) {
+                var point = event.latLng;
+                window.external.FireGroundOverlayDoubleClick(getItemRow(groundOverlays, overlay), point.lat(), point.lng());
+                clearTimeout(update_timeout);
+            });
+
+            return groundOverlays.length - 1;
+        }
+
+        function addRectangle(jsonSW, jsonNE, jsonRectangleOptions, hideExisting) {
+            if (hideExisting) {
+                for (i in rectangles) {
+                    rectangles[i].setVisible(false);
+                }
+            }
+
+            var sw = $.parseJSON(jsonSW);
+            var ne = $.parseJSON(jsonNE);
+            var rectangleOptions = $.parseJSON(jsonRectangleOptions);
+
+            var rectangle = new google.maps.Rectangle(rectangleOptions);
+
+            rectangles.push(rectangle);
+
+            var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(sw.lat, sw.lng), new google.maps.LatLng(ne.lat, ne.lng));
+
+            rectangle.setBounds(bounds);
+            rectangle.setMap(map);
+
+            google.maps.event.addListener(rectangle, 'click', function (event) {
+                update_timeout = setTimeout(function () {
+                    var point = event.latLng;
+                    window.external.FireRectangleClick(getItemRow(groundOverlays, overlay), point.lat(), point.lng());
+                }, 200);
+            });
+
+            google.maps.event.addListener(rectangle, 'dblclick', function (event) {
+                var point = event.latLng;
+                window.external.FireRectangleDoubleClick(getItemRow(groundOverlays, overlay), point.lat(), point.lng());
+                clearTimeout(update_timeout);
+            });
+
+            google.maps.event.addListener(rectangle, 'rightclick', function (event) {
+                var point = event.latLng;
+                window.external.FireRectangleRightClick(getItemRow(markers, marker), point.lat(), point.lng());
+            });
+
+            return rectangles.length - 1;
+        }
+
+        function getStreetViewVisibility() {
+            if (panorama != null) {
+                return panorama.getVisible();
+            }
+        }
+
+        function setStreetViewVisibility(show) {
+            if (panorama != null) {
+                panorama.setVisible(show);
+            }
+        }
+
+        function getJSONStreetViewPOV() {
+            if (panorama != null) {
+                return $.toJSON(panorama.getPov());
+            }
+        }
+
+        function setStreetViewPOV(jsonPOV) {
+            if (panorama != null) {
+                var pov = $.parseJSON(jsonPOV);
+                panorama.setPov(pov);
+            }
+        }
+
+        function getJSONStreetViewPosition() {
+            if (panorama != null) {
+                var position = panorama.getPosition();
+                return $.toJSON(new JSONLatLng(position.lat(), position.lng()));
+            }
+        }
+
+        function setStreetViewPosition(lat, lng) {
+            if (panorama != null) {
+                panorama.setPosition(new google.maps.LatLng(lat, lng));
+            }
+        }
+
+        function getMarkerVisibility(id) {
+            if (markers != null) {
+                return markers[id].getVisible();
+            }
+        }
+
+        function setMarkerVisibility(id, show) {
+            if (markers != null) {
+                markers[id].setVisible(show);
+            }
+        }
+
+        function setMarkerAnimation(id, animationId) {
+            if (markers != null) {
+                markers[id].setAnimation(animationId);
+            }
+        }
+
+        function getPolygonVisibility(id) {
+            if (polygons != null) {
+                return polygons[id].getVisible();
+            }
+        }
+
+        function setPolygonVisibility(id, show) {
+            if (polygons != null) {
+                polygons[id].setVisible(show);
+            }
+        }
+
+        function getPolygonEditable(id) {
+            if (polygons != null) {
+                return polygons[id].getEditable();
+            }
+        }
+
+        function setPolygonEditable(id, editable) {
+            if (polygons != null) {
+                polygons[id].setEditable(editable);
+            }
+        }
+
+        function getPolylineVisibility(id) {
+            if (polylines != null) {
+                return polylines[id].getVisible();
+            }
+        }
+
+        function setPolylineVisibility(id, show) {
+            if (polylines != null) {
+                polylines[id].setVisible(show);
+            }
+        }
+
+        function getPolylineEditable(id) {
+            if (polylines != null) {
+                return polylines[id].getEditable();
+            }
+        }
+
+        function setPolylineEditable(id, editable) {
+            if (polylines != null) {
+                polylines[id].setEditable(editable);
+            }
+        }
+
+        function getCircleVisibility(id) {
+            if (circles != null) {
+                return circles[id].getVisible();
+            }
+        }
+
+        function setCircleVisibility(id, show) {
+            if (circles != null) {
+                circles[id].setVisible(show);
+            }
+        }
+
+        function getCircleEditable(id) {
+            if (circles != null) {
+                return circles[id].getEditable();
+            }
+        }
+
+        function setCircleEditable(id, editable) {
+            if (circles != null) {
+                circles[id].setEditable(editable);
+            }
+        }
+
+        function getGroundOverlayOpacity(id) {
+            if (groundOverlays != null) {
+                return groundOverlays[id].getOpacity();
+            }
+        }
+
+        function setGroundOverlayOpacity(id, opacity) {
+            if (groundOverlays != null) {
+                groundOverlays[id].setOpacity(opacity);
+            }
+        }
+
+        function getRectangleVisibility(id) {
+            if (rectangles != null) {
+                return rectangles[id].getVisible();
+            }
+        }
+
+        function setRectangleVisibility(id, show) {
+            if (rectangles != null) {
+                rectangles[id].setVisible(show);
+            }
+        }
+
+        function getRectangleEditable(id) {
+            if (rectangles != null) {
+                return rectangles[id].getEditable();
+            }
+        }
+
+        function setRectangleEditable(id, editable) {
+            if (rectangles != null) {
+                rectangles[id].setEditable(editable);
+            }
+        }
+
+        function closeInfoWindow(id) {
+            if (infoWindows != null) {
+                infoWindows[id].close();
+            }
+        }
+
+        function getJSONMarkerPosition(id) {
+            if (markers != null) {
+                var position = markers[id].getPosition();
+                return $.toJSON(new JSONLatLng(position.lat(), position.lng()));
+            }
+        }
+
+        function getJSONCirclePosition(id) {
+            if (circles != null) {
+                var position = circles[id].getCenter();
+                return $.toJSON(new JSONLatLng(position.lat(), position.lng()));
+            }
+        }
+
+        function getCircleRadius(id) {
+            if (circles != null) {
+                return circles[id].getRadius();
+            }
+        }
+
+        function getJSONPolygonPaths(id) {
+            if (polygons != null) {
+                var newArray = new Array();
+                var paths = polygons[id].getPaths();
+
+                for (i = 0; i < paths.length; i++) {
+                    var subArray = paths.getAt(i);
+                    for (j = 0; j < subArray.length; j++) {
+                        var position = subArray.getAt(j);
+                        newArray.push(new JSONLatLng(position.lat(), position.lng()));
+                    }
+                }
+
+                return $.toJSON(newArray);
+            }
+        }
+
+        function getJSONPolylinePath(id) {
+            if (polylines != null) {
+                var newArray = new Array();
+                var paths = polylines[id].getPath();
+
+                for (i = 0; i < paths.length; i++) {
+                    var position = paths.getAt(i);
+                    newArray.push(new JSONLatLng(position.lat(), position.lng()));
+                }
+
+                return $.toJSON(newArray);
+            }
+        }
+
+        function getJSONRectangleBounds(id) {
+            if (rectangles != null) {
+                var bounds = rectangles[id].getBounds();
+                var sw = bounds.getSouthWest();
+                var ne = bounds.getNorthEast();
+                return $.toJSON(new JSONLatLngBounds(sw.lat(), sw.lng(), ne.lat(), ne.lng()));
+            }
+        }
+
+        function getItemRow(array, item) {
+            for (i = 0; i < array.length; i++) {
+                if (array[i] == item) {
+                    return i;
+                }
+            }
+        }
+
+        function decodePathString(encodedPoints) {
+            var decodedPoints = google.maps.geometry.encoding.decodePath(encodedPoints);
+
+            var newArray = new Array();
+            for (i = 0; i < decodedPoints.length; i++) {
+                var position = decodedPoints[i];
+                newArray.push(new JSONLatLng(position.lat(), position.lng()));
+            }
+
+            return $.toJSON(newArray);
+        }
+
+        function containsLocation(latitude, longitude, polygonId) {
+            if (polygons != null) {
+                return google.maps.geometry.poly.containsLocation(new google.maps.LatLng(latitude, longitude), polygons[polygonId])
+            }
+        }
+
+        function isLocationOnEdge(latitude, longitude, id, isPolygon, tolerance) {
+            if (isPolygon) {
+                if (polygons != null) {
+                    return google.maps.geometry.poly.isLocationOnEdge(new google.maps.LatLng(latitude, longitude), polygons[id], tolerance)
+                }
+            }
+            else {
+                if (polylines != null) {
+                    return google.maps.geometry.poly.isLocationOnEdge(new google.maps.LatLng(latitude, longitude), polylines[id], tolerance)
+                }
+            }
+        }
+
+        function computeArea(jsonCoordinateCollection) {
+            var coords = new Array();
+            var coordinateCol = $.parseJSON(jsonCoordinateCollection);
+            for (var i = 0; i < coordinateCol.length; i++) {
+                coords.push(new google.maps.LatLng(coordinateCol[i].lat, coordinateCol[i].lng));
+            }
+            return google.maps.geometry.spherical.computeArea(coords);
+        }
+
+        function computeDistanceBetween(jsonLocationFrom, jsonLocationTo) {
+            var locationFrom = $.parseJSON(jsonLocationFrom);
+            var locationTo = $.parseJSON(jsonLocationTo);
+
+            return google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(locationFrom.lat, locationFrom.lng), new google.maps.LatLng(locationTo.lat, locationTo.lng));
+        }
+
+        function computeHeading(jsonLocationFrom, jsonLocationTo) {
+            var locationFrom = $.parseJSON(jsonLocationFrom);
+            var locationTo = $.parseJSON(jsonLocationTo);
+
+            return google.maps.geometry.spherical.computeHeading(new google.maps.LatLng(locationFrom.lat, locationFrom.lng), new google.maps.LatLng(locationTo.lat, locationTo.lng));
+        }
+
+        function computeLength(jsonCoordinateCollection) {
+            var coords = new Array();
+            var coordinateCol = $.parseJSON(jsonCoordinateCollection);
+            for (var i = 0; i < coordinateCol.length; i++) {
+                coords.push(new google.maps.LatLng(coordinateCol[i].lat, coordinateCol[i].lng));
+            }
+            return google.maps.geometry.spherical.computeLength(coords);
+        }
+
+        function computeOffset(jsonLocationFrom, distance, heading) {
+            var locationFrom = $.parseJSON(jsonLocationFrom);
+
+            var offset = google.maps.geometry.spherical.computeOffset(new google.maps.LatLng(locationFrom.lat, locationFrom.lng), distance, heading);
+            return $.toJSON(new JSONLatLng(offset.lat(), offset.lng()));
+        }
+
+        function interpolate(jsonLocationFrom, jsonLocationTo, fraction) {
+            var locationFrom = $.parseJSON(jsonLocationFrom);
+            var locationTo = $.parseJSON(jsonLocationTo);
+
+            var result = google.maps.geometry.spherical.interpolate(new google.maps.LatLng(locationFrom.lat, locationFrom.lng), new google.maps.LatLng(locationTo.lat, locationTo.lng), fraction);
+            return $.toJSON(new JSONLatLng(result.lat(), result.lng()));
+        }
+
+        function getCustomMarkerImage(url) {
+
+            var image = new google.maps.MarkerImage(
+                url,
+                new google.maps.Size(32, 32),
+                new google.maps.Point(0, 0),
+                new google.maps.Point(16, 32),
+                new google.maps.Size(32, 32));
+
+            return image;
+        }
+
+        function setMarkerImage(id, url) {
+            var image = getCustomMarkerImage(url);
+            markers[id].setIcon(image);
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+        document.ready = loadScript;
+    </script>
+</head>
+<body>
+    <div id="map_canvas" style="width: 100%; height: 100%">
+    </div>
+</body>
+</html>

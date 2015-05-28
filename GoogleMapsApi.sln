@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleMapsApi", "GoogleMapsApi\GoogleMapsApi.csproj", "{016851BF-04A0-4925-9180-56F97EDFFAD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleMapsApiTester", "GoogleMapsApiTester\GoogleMapsApiTester.csproj", "{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{016851BF-04A0-4925-9180-56F97EDFFAD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{016851BF-04A0-4925-9180-56F97EDFFAD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{016851BF-04A0-4925-9180-56F97EDFFAD4}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{016851BF-04A0-4925-9180-56F97EDFFAD4}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{016851BF-04A0-4925-9180-56F97EDFFAD4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{016851BF-04A0-4925-9180-56F97EDFFAD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{016851BF-04A0-4925-9180-56F97EDFFAD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{016851BF-04A0-4925-9180-56F97EDFFAD4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{016851BF-04A0-4925-9180-56F97EDFFAD4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{016851BF-04A0-4925-9180-56F97EDFFAD4}.Release|x86.ActiveCfg = Release|Any CPU
+		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Debug|x86.ActiveCfg = Debug|x86
+		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Debug|x86.Build.0 = Debug|x86
+		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Release|Any CPU.ActiveCfg = Release|x86
+		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Release|Mixed Platforms.Build.0 = Release|x86
+		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Release|x86.ActiveCfg = Release|x86
+		{8884EED2-2418-4F22-90C9-ECD1B68A1DB8}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
