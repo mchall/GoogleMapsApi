@@ -127,7 +127,7 @@ namespace GoogleMapsApiTester
                 DraggingEnabled = true,
             };
             var marker = _gMapsWrapper.AddMarker(_gMapsWrapper.Center, option, false);
-            _gMapsWrapper.ShowInfoWindow("Marker Info", marker, new InfoWindowOptions(), false);
+            _gMapsWrapper.ShowInfoWindow("Marker Info", marker, new InfoWindowOptions() { MaxWidth = 100 }, false);
         }
 
         private void MapTest_Click(object sender, EventArgs e)
@@ -137,8 +137,7 @@ namespace GoogleMapsApiTester
 
         private void btnStreetView_Click(object sender, EventArgs e)
         {
-            _gMapsWrapper.StreetView.Position = new GeographicLocation(-33.9711373, 18.4653628);
-            _gMapsWrapper.StreetView.POV = new POV() { Heading = 180 };
+            _gMapsWrapper.StreetView.Position = new GeographicLocation(-33.9713736, 18.4648659);
             _gMapsWrapper.StreetView.ShowInfoWindow("Hello world", new GeographicLocation(-33.9711373, 18.4653628), new InfoWindowOptions() { MaxWidth = 100 }, true);
             _gMapsWrapper.StreetView.Visible = true;
         }
