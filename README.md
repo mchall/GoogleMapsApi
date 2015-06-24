@@ -1,7 +1,7 @@
 # Google Maps Api
 Host a Google Maps control in your WinForms or WPF application.
 
-![Original](http://mcsyko.github.io/Images/GoogleMapsApi/googlemaps.png)
+![Original](http://mchall.github.io/Images/GoogleMapsApi/googlemaps.png)
 
 ### Usage ###
 
