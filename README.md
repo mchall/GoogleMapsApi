@@ -1,6 +1,8 @@
 # Google Maps Api
 Host a Google Maps control in your WinForms or WPF application.
 
+NOTE: The Google Maps Javascript API no longer supports the browsers in the samples, but the implementation is not tied to any specific browser. It will still work correctly with more recent browser controls. 
+
 ![Original](http://mchall.github.io/Images/GoogleMapsApi/googlemaps.png)
 
 ### Usage ###
